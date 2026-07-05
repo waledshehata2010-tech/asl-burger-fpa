@@ -28,7 +28,7 @@ const accentMap: Record<NonNullable<KpiCardProps["accent"]>, string> = {
 export function KpiCard({ label, value, delta, positiveIsGood = true, sparkline, icon: Icon, accent = "primary" }: KpiCardProps) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
-      <Card className="relative overflow-hidden border-border/60">
+      <Card className="relative overflow-hidden border-border/60" role="group" aria-label={`${label}: ${value}`}>
         <CardContent className="p-5">
           <div className="flex items-start justify-between">
             <div>
@@ -36,7 +36,7 @@ export function KpiCard({ label, value, delta, positiveIsGood = true, sparkline,
               <p className="mt-2 text-2xl font-semibold tracking-tight tabular">{value}</p>
             </div>
             {Icon && (
-              <div className={cn("rounded-lg bg-white/5 p-2", accentMap[accent])}>
+              <div className={cn("rounded-lg bg-white/5 p-2", accentMap[accent])} aria-hidden="true">
                 <Icon className="h-4 w-4" />
               </div>
             )}
@@ -44,7 +44,7 @@ export function KpiCard({ label, value, delta, positiveIsGood = true, sparkline,
           <div className="mt-3 flex items-center justify-between gap-3">
             {delta !== undefined ? <Delta value={delta} positiveIsGood={positiveIsGood} /> : <span />}
             {sparkline && sparkline.length > 1 && (
-              <div className="w-20">
+              <div className="w-20" aria-hidden="true">
                 <Sparkline data={sparkline} />
               </div>
             )}
