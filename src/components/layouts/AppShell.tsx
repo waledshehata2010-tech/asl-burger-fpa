@@ -7,10 +7,10 @@ import {
   FileBarChart,
   Languages,
   LayoutDashboard,
-  Sandwich,
   ScatterChart,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useT, type DictKey } from "@/lib/i18n";
 import { useLocaleStore } from "@/store/localeStore";
@@ -94,14 +94,16 @@ export function AppShell() {
         aria-label="Primary"
       >
         <div className="mb-6 flex items-center gap-2.5 px-2">
-          {/* Brand mark: gold circle + black glyph, matching the aslalburger.sa
-              logo's color composition. Swap for the real logo asset (an
-              <Image> pointing at /brand/asl-burger-logo.png) as soon as it's
-              available — this keeps the same footprint so no layout change
-              is needed when that lands. */}
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm shadow-primary/30">
-            <Sandwich className="h-5 w-5" aria-hidden="true" />
-          </div>
+          {/* Official Asl Burger mark (aslalburger.sa), cropped to the
+              circular icon so it reads cleanly on the dark sidebar. */}
+          <Image
+            src="/brand/asl-burger-mark.png"
+            alt="Asl Burger"
+            width={36}
+            height={36}
+            priority
+            className="h-9 w-9 shrink-0 rounded-full shadow-sm shadow-primary/30"
+          />
           <div className="min-w-0">
             <p className="truncate text-sm font-bold leading-tight">{t("appName")}</p>
             <p className="truncate text-[11px] text-muted-foreground leading-tight">{t("appTagline")}</p>
@@ -148,9 +150,13 @@ export function AppShell() {
       <div className="flex min-h-screen flex-1 flex-col">
         <header className="no-print sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-background/80 px-4 py-4 backdrop-blur sm:px-6">
           <div className="flex min-w-0 items-center gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm shadow-primary/30 lg:hidden">
-              <Sandwich className="h-4 w-4" aria-hidden="true" />
-            </div>
+            <Image
+              src="/brand/asl-burger-mark.png"
+              alt="Asl Burger"
+              width={32}
+              height={32}
+              className="h-8 w-8 shrink-0 rounded-full shadow-sm shadow-primary/30 lg:hidden"
+            />
             <div className="min-w-0">
               <h1 className="truncate text-base font-semibold tracking-tight sm:text-lg">
                 {activeLabel ? t(activeLabel) : ""}
@@ -165,6 +171,11 @@ export function AppShell() {
             <UploadWorkbookDialog />
           </div>
         </header>
+
+        <div className="print-only mb-6 items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element -- plain img keeps the print header simple and avoids next/image's client hydration on a print-only element */}
+          <img src="/brand/asl-burger-logo-full.png" alt="Asl Burger" className="h-14 w-auto" />
+        </div>
 
         <main id="main-content" className="flex-1 px-4 py-6 pb-24 sm:px-6 lg:pb-6">
           <motion.div
