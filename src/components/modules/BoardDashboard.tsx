@@ -124,7 +124,7 @@ export function BoardDashboard() {
             data={chartData}
             xKey="year"
             series={[
-              { key: revenueLabel, label: revenueLabel, color: "#4f8ff7" },
+              { key: revenueLabel, label: revenueLabel, color: "#fbb617" },
               { key: netIncomeLabel, label: netIncomeLabel, color: "#34c77b" },
             ]}
             height={260}

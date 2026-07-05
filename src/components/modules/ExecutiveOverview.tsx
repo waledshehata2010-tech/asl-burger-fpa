@@ -393,8 +393,8 @@ export function ExecutiveOverview() {
               data={chartData}
               xKey="year"
               series={[
-                { key: revenueActualLabel, label: revenueActualLabel, color: "#4f8ff7" },
-                { key: revenueForecastLabel, label: revenueForecastLabel, color: "#4f8ff7", dashed: true },
+                { key: revenueActualLabel, label: revenueActualLabel, color: "#fbb617" },
+                { key: revenueForecastLabel, label: revenueForecastLabel, color: "#fbb617", dashed: true },
                 { key: netIncomeActualLabel, label: netIncomeActualLabel, color: "#34c77b" },
                 { key: netIncomeForecastLabel, label: netIncomeForecastLabel, color: "#34c77b", dashed: true },
               ]}
@@ -436,8 +436,8 @@ export function ExecutiveOverview() {
             data={marginData}
             xKey="year"
             series={[
-              { key: grossMarginLabel, label: grossMarginLabel, color: "#4f8ff7" },
-              { key: ebitdaMarginLabel, label: ebitdaMarginLabel, color: "#e8b64c" },
+              { key: grossMarginLabel, label: grossMarginLabel, color: "#fbb617" },
+              { key: ebitdaMarginLabel, label: ebitdaMarginLabel, color: "#e5e5e3" },
               { key: netMarginLabel, label: netMarginLabel, color: "#34c77b" },
             ]}
             valueFormatter={(v) => fmtPct(v)}

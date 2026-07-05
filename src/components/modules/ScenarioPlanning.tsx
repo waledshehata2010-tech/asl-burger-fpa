@@ -164,7 +164,7 @@ export function ScenarioPlanning() {
               data={chartData}
               xKey="year"
               series={[
-                { key: currentScenarioLabel, label: currentScenarioLabel, color: "#4f8ff7" },
+                { key: currentScenarioLabel, label: currentScenarioLabel, color: "#fbb617" },
                 { key: baseReferenceLabel, label: baseReferenceLabel, color: "#9aa1ae", dashed: true },
               ]}
               height={280}
