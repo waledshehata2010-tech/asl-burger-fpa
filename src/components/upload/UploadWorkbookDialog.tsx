@@ -14,9 +14,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useFinancialModel } from "@/hooks/useFinancialModel";
+import { useT } from "@/lib/i18n";
 
 export function UploadWorkbookDialog() {
   const { model, isUsingSample, uploadStatus, uploadError, loadWorkbookFile, resetToSample } = useFinancialModel();
+  const { t } = useT();
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -24,34 +26,33 @@ export function UploadWorkbookDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <UploadCloud className="h-4 w-4" />
-          رفع ملف الإكسل
+          <UploadCloud className="h-4 w-4" aria-hidden="true" />
+          <span className="hidden sm:inline">{t("uploadButton")}</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>مصدر البيانات</DialogTitle>
-          <DialogDescription>
-            الملف المرفوع هو مصدر الحقيقة الوحيد للمنصة — كل المؤشرات والرسومات والتقييم تُعاد حسابها تلقائيًا فور الرفع.
-          </DialogDescription>
+          <DialogTitle>{t("dataSourceTitle")}</DialogTitle>
+          <DialogDescription>{t("dataSourceDesc")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-3">
-          <FileSpreadsheet className="h-5 w-5 shrink-0 text-primary" />
+          <FileSpreadsheet className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{model.meta.sourceFileName ?? "لا يوجد ملف"}</p>
+            <p className="truncate text-sm font-medium">{model.meta.sourceFileName ?? t("noFile")}</p>
             <p className="text-xs text-muted-foreground">
-              {isUsingSample ? "عينة افتراضية مبنية على البيانات المدققة" : "ملف مرفوع من المستخدم"}
+              {isUsingSample ? t("sampleDatasetDesc") : t("userUploadedDesc")}
             </p>
           </div>
-          {isUsingSample ? <Badge variant="secondary">عينة</Badge> : <Badge variant="success">مباشر</Badge>}
+          {isUsingSample ? <Badge variant="secondary">{t("sampleBadge")}</Badge> : <Badge variant="success">{t("liveBadge")}</Badge>}
         </div>
 
         <input
           ref={inputRef}
           type="file"
-          accept=".xlsx,.xls"
+          accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
           className="hidden"
+          aria-label={t("chooseFile")}
           onChange={async (e) => {
             const file = e.target.files?.[0];
             if (file) await loadWorkbookFile(file);
@@ -60,20 +61,24 @@ export function UploadWorkbookDialog() {
         />
 
         {uploadStatus === "error" && (
-          <p className="rounded-md border border-danger/30 bg-danger/10 p-2 text-xs text-danger">{uploadError}</p>
+          <p role="alert" className="rounded-md border border-danger/30 bg-danger/10 p-2 text-xs text-danger">
+            {uploadError}
+          </p>
         )}
         {uploadStatus === "success" && uploadError && (
-          <p className="rounded-md border border-warning/30 bg-warning/10 p-2 text-xs text-warning">{uploadError}</p>
+          <p role="status" className="rounded-md border border-warning/30 bg-warning/10 p-2 text-xs text-warning">
+            {uploadError}
+          </p>
         )}
 
         <DialogFooter className="gap-2 sm:justify-between">
           <Button variant="ghost" size="sm" onClick={resetToSample} disabled={isUsingSample}>
-            <RotateCcw className="h-4 w-4" />
-            الرجوع للعينة الافتراضية
+            <RotateCcw className="h-4 w-4" aria-hidden="true" />
+            {t("resetToSample")}
           </Button>
           <Button size="sm" onClick={() => inputRef.current?.click()} disabled={uploadStatus === "parsing"}>
-            <UploadCloud className="h-4 w-4" />
-            {uploadStatus === "parsing" ? "جارٍ القراءة..." : "اختيار ملف .xlsx"}
+            <UploadCloud className="h-4 w-4" aria-hidden="true" />
+            {uploadStatus === "parsing" ? t("parsing") : t("chooseFile")}
           </Button>
         </DialogFooter>
       </DialogContent>
