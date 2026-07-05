@@ -232,6 +232,7 @@ export const dict = {
   investorTitle: { ar: "عرض المستثمرين", en: "Investor Dashboard" },
   investorDesc: { ar: "نظرة مبسطة على قصة النمو والتقييم", en: "A simplified view of the growth story and valuation" },
   investorGrowthStory: { ar: "قصة النمو", en: "Growth Story" },
+  investorRevenueChartTitle: { ar: "الإيرادات — فعلي ومتوقع", en: "Revenue — Actual & Forecast" },
   investorValuationSummary: { ar: "ملخص التقييم", en: "Valuation Summary" },
   investorDisclaimer: {
     ar: "لأغراض العرض فقط — مبني على نموذج داخلي وليس نصيحة استثمارية.",
