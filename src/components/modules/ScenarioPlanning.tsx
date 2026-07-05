@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
+import { PdfExportButton } from "@/components/export/PdfExportButton";
 import { LineChartPanel } from "@/components/charts/LineChartPanel";
 import { KpiCard } from "@/components/kpi/KpiCard";
 import { useFinancialModel } from "@/hooks/useFinancialModel";
@@ -54,17 +55,20 @@ export function ScenarioPlanning() {
   const lastYear = scenarioResult.years[lastIdx];
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 print-page">
       <Card>
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle>{t("scenarioTitle")}</CardTitle>
             <CardDescription>{t("scenarioDesc")}</CardDescription>
           </div>
-          <Button variant="ghost" size="sm" onClick={resetOverrides}>
-            <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            {t("resetOverrides")}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={resetOverrides}>
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              {t("resetOverrides")}
+            </Button>
+            <PdfExportButton />
+          </div>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <Tabs value={scenarioKey} onValueChange={(v) => setScenarioKey(v as ScenarioKey)}>

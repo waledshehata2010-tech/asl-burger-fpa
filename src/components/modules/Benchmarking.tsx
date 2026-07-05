@@ -10,6 +10,7 @@ import { useFinancialModel } from "@/hooks/useFinancialModel";
 import { fmtMetric } from "@/lib/format";
 import { useT, type DictKey } from "@/lib/i18n";
 import { ExportButtons } from "@/components/export/ExportButtons";
+import { PdfExportButton } from "@/components/export/PdfExportButton";
 import type { BenchmarkCompany } from "@/types/financial";
 
 interface BenchmarkRow {
@@ -75,7 +76,7 @@ export function Benchmarking() {
   ];
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 print-page">
       <Card>
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -87,6 +88,7 @@ export function Benchmarking() {
               {t("benchmarkSource")}
             </Badge>
             <ExportButtons rows={exportRows} sheetName={t("benchmarkTitle")} fileName="asl-burger-benchmarks" />
+            <PdfExportButton />
           </div>
         </CardHeader>
         <CardContent>

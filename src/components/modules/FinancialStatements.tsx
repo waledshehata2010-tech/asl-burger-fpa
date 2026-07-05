@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
 import type { ColDef } from "ag-grid-community";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,6 +10,8 @@ import { useFinancialModel } from "@/hooks/useFinancialModel";
 import { fmtNum, fmtX } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 import { ExportButtons } from "@/components/export/ExportButtons";
+import { PdfExportButton } from "@/components/export/PdfExportButton";
+import { useUiStore } from "@/store/uiStore";
 
 interface StatementRow {
   metric: string;
@@ -50,7 +52,8 @@ export function FinancialStatements() {
   const { model, scenarioResult } = useFinancialModel();
   const { t, locale } = useT();
   const { historical, forecastBase } = model;
-  const [activeTab, setActiveTab] = useState<TabKey>("income");
+  const activeTab = useUiStore((s) => s.statementsTab);
+  const setActiveTab = useUiStore((s) => s.setStatementsTab);
   const isRtl = locale === "ar";
 
   const incomeRows = useMemo(
@@ -119,13 +122,16 @@ export function FinancialStatements() {
   const current = tabsData[activeTab];
 
   return (
-    <Card>
+    <Card className="print-page">
       <CardHeader className="flex flex-row items-start justify-between gap-3">
         <div>
           <CardTitle>{t("statementsTitle")}</CardTitle>
           <CardDescription>{t("statementsDesc")}</CardDescription>
         </div>
-        <ExportButtons rows={current.rows} sheetName={current.label} fileName={`asl-burger-${activeTab}`} />
+        <div className="flex items-center gap-2">
+          <ExportButtons rows={current.rows} sheetName={current.label} fileName={`asl-burger-${activeTab}`} />
+          <PdfExportButton />
+        </div>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabKey)}>
