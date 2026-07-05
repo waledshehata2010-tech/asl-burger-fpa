@@ -144,6 +144,10 @@ export function AppShell() {
           <div className="rounded-lg border border-border bg-muted/30 px-3 py-2.5 text-[11px] text-muted-foreground">
             {t("dataSource")}: {isUsingSample ? t("sampleAudited") : model.meta.sourceFileName}
           </div>
+          <div className="px-1 pt-1 text-[10px] leading-snug text-muted-foreground/70">
+            <p className="font-medium">Prepared by: Waleed Shehata</p>
+            <p>Financial Management &ndash; Asl Al-Burger</p>
+          </div>
         </div>
       </aside>
 
@@ -172,12 +176,17 @@ export function AppShell() {
           </div>
         </header>
 
-        <div className="print-only mb-6 items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element -- plain img keeps the print header simple and avoids next/image's client hydration on a print-only element */}
-          <img src="/brand/asl-burger-logo-full.png" alt="Asl Burger" className="h-14 w-auto" />
+        <div className="print-only mb-6 flex-col gap-2">
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element -- plain img keeps the print header simple and avoids next/image's client hydration on a print-only element */}
+            <img src="/brand/asl-burger-logo-full.png" alt="Asl Burger" className="h-14 w-auto" />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Prepared by: Waleed Shehata &mdash; Financial Management, Asl Al-Burger
+          </p>
         </div>
 
-        <main id="main-content" className="flex-1 px-4 py-6 pb-24 sm:px-6 lg:pb-6">
+        <main id="main-content" className="flex-1 px-4 py-6 pb-32 sm:px-6 lg:pb-6">
           <motion.div
             key={active}
             initial={{ opacity: 0, y: 6 }}
@@ -196,31 +205,35 @@ export function AppShell() {
 
       {/* Mobile bottom tab bar — replaces the sidebar below the lg breakpoint,
           so every module stays reachable on phones/tablets. */}
-      <nav
-        aria-label={t("navOverview")}
-        className="no-print fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around overflow-x-auto border-t border-border bg-card/95 backdrop-blur lg:hidden"
+      <div
+        className="no-print fixed inset-x-0 bottom-0 z-40 flex flex-col border-t border-border bg-card/95 backdrop-blur lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        {MODULES.map((m) => {
-          const Icon = m.icon;
-          const isActive = active === m.key;
-          return (
-            <button
-              key={m.key}
-              type="button"
-              onClick={() => setActive(m.key)}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "flex flex-1 flex-col items-center gap-1 px-1 py-2.5 text-[10px] font-medium transition-colors",
-                isActive ? "text-primary" : "text-muted-foreground",
-              )}
-            >
-              <Icon className="h-5 w-5" aria-hidden="true" />
-              <span className="line-clamp-1 text-center leading-tight">{t(m.labelKey)}</span>
-            </button>
-          );
-        })}
-      </nav>
+        <nav aria-label={t("navOverview")} className="flex items-stretch justify-around overflow-x-auto">
+          {MODULES.map((m) => {
+            const Icon = m.icon;
+            const isActive = active === m.key;
+            return (
+              <button
+                key={m.key}
+                type="button"
+                onClick={() => setActive(m.key)}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "flex flex-1 flex-col items-center gap-1 px-1 py-2.5 text-[10px] font-medium transition-colors",
+                  isActive ? "text-primary" : "text-muted-foreground",
+                )}
+              >
+                <Icon className="h-5 w-5" aria-hidden="true" />
+                <span className="line-clamp-1 text-center leading-tight">{t(m.labelKey)}</span>
+              </button>
+            );
+          })}
+        </nav>
+        <p className="border-t border-border/60 py-1 text-center text-[9px] leading-tight text-muted-foreground/70">
+          Prepared by: Waleed Shehata &ndash; Financial Management, Asl Al-Burger
+        </p>
+      </div>
     </div>
   );
 }
