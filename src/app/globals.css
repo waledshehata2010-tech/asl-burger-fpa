@@ -75,3 +75,62 @@ body {
 .ag-theme-fpa {
   border-radius: var(--radius);
 }
+
+/* ---------------------------------------------------------------------- */
+/* Premium/executive polish                                                */
+/* ---------------------------------------------------------------------- */
+
+/* Subtle elevation on hover for interactive cards (KPI cards, etc.) is
+   applied per-component via Tailwind utilities; this just tightens up the
+   default heading tracking platform-wide for a more "enterprise" feel. */
+h1, h2, h3 {
+  letter-spacing: -0.01em;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Print / PDF export                                                      */
+/* ---------------------------------------------------------------------- */
+/* Every module wraps its printable content in `.print-page`. `.no-print`
+   marks navigation chrome (sidebar, header, mobile tab bar, action buttons)
+   that should never appear in a printed/exported page. Overriding the same
+   CSS custom properties the whole app already reads through means every
+   component (Card, KpiCard, tables, charts) automatically renders in a
+   light, ink-friendly palette on paper with zero component-level changes. */
+@media print {
+  :root {
+    --background: #ffffff;
+    --foreground: #101317;
+    --card: #ffffff;
+    --card-foreground: #101317;
+    --muted: #f3f4f6;
+    --muted-foreground: #4b5563;
+    --border: rgba(0, 0, 0, 0.12);
+    --accent: #f3f4f6;
+  }
+
+  html, body {
+    background: #ffffff !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .print-page {
+    break-inside: avoid-page;
+  }
+
+  .shadow-sm, .shadow-lg, .shadow-black\/20 {
+    box-shadow: none !important;
+  }
+
+  /* AG Grid's Theming API renders its own inline dark colors independent of
+     these CSS vars, so grid tables are intentionally left as-is when
+     printed — export via the CSV/Excel buttons remains the accurate path
+     for tabular data; the PDF export is aimed at narrative/KPI pages. */
+}
