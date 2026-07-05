@@ -173,6 +173,73 @@ export const dict = {
   notFoundTitle: { ar: "الصفحة غير موجودة", en: "Page not found" },
   notFoundDesc: { ar: "الصفحة التي تبحث عنها غير متاحة.", en: "The page you're looking for isn't available." },
   backHome: { ar: "العودة للرئيسية", en: "Back to home" },
+
+  // Navigation — new modules
+  navBoard: { ar: "تقرير مجلس الإدارة", en: "Board Report" },
+  navInvestor: { ar: "عرض المستثمرين", en: "Investor View" },
+
+  // Executive Home — premium sections
+  ceoSummaryTitle: { ar: "ملخص الرئيس التنفيذي (CEO)", en: "CEO Summary" },
+  cfoSummaryTitle: { ar: "ملخص المدير المالي (CFO)", en: "CFO Summary" },
+  aiExecSummaryTitle: { ar: "الملخص التنفيذي الذكي", en: "AI Executive Summary" },
+  aiExecSummaryBadge: { ar: "مُولَّد آليًا من الموديل المالي", en: "Generated from the live financial model" },
+  todayInsightsTitle: { ar: "أبرز الرؤى اليوم", en: "Today's Key Insights" },
+  topRisksTitle: { ar: "أهم المخاطر", en: "Top Risks" },
+  topOpportunitiesTitle: { ar: "أهم الفرص", en: "Top Opportunities" },
+  healthScoreTitle: { ar: "مؤشر الصحة المالية", en: "Financial Health Score" },
+  healthScoreOutOf: { ar: "من 100", en: "out of 100" },
+  noRisksFound: { ar: "لا توجد مخاطر جوهرية حاليًا.", en: "No material risks detected right now." },
+  noOpportunitiesFound: { ar: "لا توجد فرص إضافية بارزة حاليًا.", en: "No standout opportunities right now." },
+
+  // Smart Alerts
+  smartAlertsTitle: { ar: "التنبيهات الذكية", en: "Smart Alerts" },
+  smartAlertsNone: { ar: "لا توجد تنبيهات — جميع المؤشرات ضمن النطاق الطبيعي.", en: "No alerts — everything is within normal range." },
+  severityCritical: { ar: "حرج", en: "Critical" },
+  severityWarning: { ar: "تحذير", en: "Warning" },
+  severityInfo: { ar: "معلومة", en: "Info" },
+  severityGood: { ar: "إيجابي", en: "Good" },
+
+  // KPI intelligence
+  kpiIntelTitle: { ar: "ذكاء مؤشرات الأداء", en: "KPI Intelligence" },
+  kpiTrend: { ar: "الاتجاه", en: "Trend" },
+  kpiTarget: { ar: "الهدف", en: "Target" },
+  kpiVariance: { ar: "الفارق", en: "Variance" },
+  kpiStatus: { ar: "الحالة", en: "Status" },
+  statusGood: { ar: "جيد", en: "Good" },
+  statusWarning: { ar: "تحذير", en: "Warning" },
+  statusCritical: { ar: "حرج", en: "Critical" },
+  clickToDrilldown: { ar: "اضغط لعرض التفاصيل في القوائم المالية", en: "Click to drill into the financial statements" },
+
+  kpiNameGrossMargin: { ar: "هامش الربح الإجمالي", en: "Gross Margin" },
+  kpiNameEbitdaMargin: { ar: "هامش EBITDA", en: "EBITDA Margin" },
+  kpiNameNetMargin: { ar: "هامش صافي الربح", en: "Net Margin" },
+  kpiNameCurrentRatio: { ar: "نسبة التداول", en: "Current Ratio" },
+  kpiNameRevenueCagr: { ar: "نمو الإيرادات المركب", en: "Revenue CAGR" },
+  kpiNameDcfEv: { ar: "القيمة المؤسسية (DCF)", en: "Enterprise Value (DCF)" },
+
+  // Board Dashboard
+  boardTitle: { ar: "تقرير مجلس الإدارة", en: "Board Dashboard" },
+  boardDesc: { ar: "ملخص جاهز للطباعة لاجتماع مجلس الإدارة", en: "Print-ready summary for the board meeting" },
+  boardPreparedFor: { ar: "أُعد لاجتماع مجلس الإدارة", en: "Prepared for the Board of Directors" },
+  boardGeneratedOn: { ar: "تاريخ الإعداد", en: "Generated on" },
+  boardKeyMetrics: { ar: "أبرز المؤشرات المالية", en: "Key Financial Metrics" },
+  boardFooterNote: {
+    ar: "هذا التقرير مبني على الموديل المالي المدقق ويُحدَّث تلقائيًا عند تغيير البيانات أو السيناريو.",
+    en: "This report is built on the audited financial model and updates automatically with any data or scenario change.",
+  },
+
+  // Investor Dashboard
+  investorTitle: { ar: "عرض المستثمرين", en: "Investor Dashboard" },
+  investorDesc: { ar: "نظرة مبسطة على قصة النمو والتقييم", en: "A simplified view of the growth story and valuation" },
+  investorGrowthStory: { ar: "قصة النمو", en: "Growth Story" },
+  investorValuationSummary: { ar: "ملخص التقييم", en: "Valuation Summary" },
+  investorDisclaimer: {
+    ar: "لأغراض العرض فقط — مبني على نموذج داخلي وليس نصيحة استثمارية.",
+    en: "For presentation purposes only — based on an internal model, not investment advice.",
+  },
+
+  // Export
+  exportPdf: { ar: "تصدير PDF", en: "Export PDF" },
 } as const;
 
 export type DictKey = keyof typeof dict;
