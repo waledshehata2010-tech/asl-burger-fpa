@@ -25,6 +25,14 @@ const cairo = Cairo({
 export const metadata: Metadata = {
   title: "أصل البرجر | منصة التخطيط والتحليل المالي",
   description: "Asl Burger Enterprise FP&A Platform — نمذجة مالية، سيناريوهات، وتقييم مباشر مبني على ملف الإكسل الرسمي.",
+  icons: {
+    icon: [
+      { url: "/brand/asl-burger-mark.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/brand/asl-burger-mark.png",
+  },
 };
 
 export const viewport: Viewport = {

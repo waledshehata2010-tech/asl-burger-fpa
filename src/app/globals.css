@@ -63,6 +63,10 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.print-only {
+  display: none;
+}
+
 .tabular {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
@@ -120,6 +124,10 @@ h1, h2, h3 {
 
   .no-print {
     display: none !important;
+  }
+
+  .print-only {
+    display: flex !important;
   }
 
   main {
