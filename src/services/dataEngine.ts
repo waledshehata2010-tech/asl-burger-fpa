@@ -154,7 +154,15 @@ export function simpleDCF(
   waccPremium: number,
   terminalGrowth: number,
 ): DcfResult {
-  const wacc = waccBase + waccPremium;
+  const rawWacc = waccBase + waccPremium;
+  // Guard rail: a Gordon-growth terminal value is only mathematically valid
+  // when the discount rate exceeds the terminal growth rate. If slider
+  // overrides ever push WACC at or below terminal growth, the naive formula
+  // would divide by ~0 or go negative and produce a nonsensical valuation.
+  // Floor the spread at 1 percentage point instead of silently exploding.
+  const MIN_SPREAD = 0.01;
+  const wacc = rawWacc > terminalGrowth + MIN_SPREAD ? rawWacc : terminalGrowth + MIN_SPREAD;
+
   const fcf = scenarioResult.netIncome.map(
     (ni, i) => ni + (scenarioResult.ebitda[i] - scenarioResult.operatingIncome[i]) - scenarioResult.capex[i],
   );
@@ -175,9 +183,10 @@ export function baseScenario(model: FinancialModel): ScenarioResult {
 
 /** CAGR between the first and last values of a numeric series. */
 export function cagr(series: number[]): number {
-  if (series.length < 2 || series[0] === 0) return 0;
+  if (series.length < 2 || series[0] <= 0 || series[series.length - 1] < 0) return 0;
   const years = series.length - 1;
-  return Math.pow(series[series.length - 1] / series[0], 1 / years) - 1;
+  const result = Math.pow(series[series.length - 1] / series[0], 1 / years) - 1;
+  return Number.isFinite(result) ? result : 0;
 }
 
 /** Year-over-year delta (fraction) for the latest two points of a series. */
