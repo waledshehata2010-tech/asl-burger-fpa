@@ -6,7 +6,7 @@ export const fpaGridTheme = themeQuartz.withParams({
   backgroundColor: "#12151c",
   foregroundColor: "#e4e6ea",
   browserColorScheme: "dark",
-  accentColor: "#4f8ff7",
+  accentColor: "#fbb617",
   borderColor: "rgba(255,255,255,0.08)",
   headerBackgroundColor: "#171b24",
   headerTextColor: "#9aa1ae",
