@@ -1,18 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   BarChart3,
+  ClipboardList,
   FileBarChart,
   GaugeCircle,
   Languages,
   LayoutDashboard,
   ScatterChart,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT, type DictKey } from "@/lib/i18n";
 import { useLocaleStore } from "@/store/localeStore";
+import { useUiStore, type ModuleKey } from "@/store/uiStore";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { UploadWorkbookDialog } from "@/components/upload/UploadWorkbookDialog";
@@ -21,10 +23,9 @@ import { ExecutiveOverview } from "@/components/modules/ExecutiveOverview";
 
 // The Executive Overview is the default/most-visited tab, so it stays a
 // normal static import (bundled up front, no extra network waterfall on
-// first load). The other three modules pull in the heaviest dependencies
-// (AG Grid especially) and are only ever needed once the user navigates to
-// them, so they're loaded on demand — this is what keeps the initial JS
-// payload lean.
+// first load). The other modules pull in the heaviest dependencies (AG Grid
+// especially) and are only ever needed once the user navigates to them, so
+// they're loaded on demand — this is what keeps the initial JS payload lean.
 const ModuleSkeleton = () => (
   <div className="flex h-64 items-center justify-center text-muted-foreground">
     <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
@@ -43,15 +44,23 @@ const Benchmarking = dynamic(
   () => import("@/components/modules/Benchmarking").then((m) => m.Benchmarking),
   { loading: ModuleSkeleton, ssr: false },
 );
+const BoardDashboard = dynamic(
+  () => import("@/components/modules/BoardDashboard").then((m) => m.BoardDashboard),
+  { loading: ModuleSkeleton },
+);
+const InvestorDashboard = dynamic(
+  () => import("@/components/modules/InvestorDashboard").then((m) => m.InvestorDashboard),
+  { loading: ModuleSkeleton },
+);
 
-const MODULES: { key: string; labelKey: DictKey; icon: typeof LayoutDashboard }[] = [
+const MODULES: { key: ModuleKey; labelKey: DictKey; icon: typeof LayoutDashboard }[] = [
   { key: "overview", labelKey: "navOverview", icon: LayoutDashboard },
   { key: "statements", labelKey: "navStatements", icon: FileBarChart },
   { key: "scenarios", labelKey: "navScenarios", icon: ScatterChart },
   { key: "benchmarks", labelKey: "navBenchmarks", icon: BarChart3 },
+  { key: "board", labelKey: "navBoard", icon: ClipboardList },
+  { key: "investor", labelKey: "navInvestor", icon: Users },
 ];
-
-type ModuleKey = (typeof MODULES)[number]["key"];
 
 function LanguageToggle() {
   const { t } = useT();
@@ -70,7 +79,8 @@ function LanguageToggle() {
 }
 
 export function AppShell() {
-  const [active, setActive] = useState<ModuleKey>("overview");
+  const active = useUiStore((s) => s.activeModule);
+  const setActive = useUiStore((s) => s.setActiveModule);
   const { model, isUsingSample } = useFinancialModel();
   const { t } = useT();
 
@@ -80,11 +90,11 @@ export function AppShell() {
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
       <aside
-        className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-e border-border bg-card/60 px-3 py-5 lg:flex"
+        className="no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-e border-border bg-card/60 px-3 py-5 lg:flex"
         aria-label="Primary"
       >
         <div className="mb-6 flex items-center gap-2 px-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 text-primary">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary/25 to-primary/10 text-primary shadow-inner">
             <GaugeCircle className="h-5 w-5" aria-hidden="true" />
           </div>
           <div>
@@ -131,7 +141,7 @@ export function AppShell() {
       </aside>
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-background/80 px-4 py-4 backdrop-blur sm:px-6">
+        <header className="no-print sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-background/80 px-4 py-4 backdrop-blur sm:px-6">
           <div className="min-w-0">
             <h1 className="truncate text-base font-semibold tracking-tight sm:text-lg">
               {activeLabel ? t(activeLabel) : ""}
@@ -157,6 +167,8 @@ export function AppShell() {
             {active === "statements" && <FinancialStatements />}
             {active === "scenarios" && <ScenarioPlanning />}
             {active === "benchmarks" && <Benchmarking />}
+            {active === "board" && <BoardDashboard />}
+            {active === "investor" && <InvestorDashboard />}
           </motion.div>
         </main>
       </div>
@@ -165,7 +177,7 @@ export function AppShell() {
           so every module stays reachable on phones/tablets. */}
       <nav
         aria-label={t("navOverview")}
-        className="fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t border-border bg-card/95 backdrop-blur lg:hidden"
+        className="no-print fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around overflow-x-auto border-t border-border bg-card/95 backdrop-blur lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         {MODULES.map((m) => {
