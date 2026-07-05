@@ -7,6 +7,9 @@
 import { create } from "zustand";
 import { SAMPLE_MODEL } from "@/data/sampleModel";
 import { parseWorkbookFile } from "@/services/excelParser";
+import { validateWorkbookFile } from "@/lib/fileValidation";
+import { translate } from "@/lib/i18n";
+import { useLocaleStore } from "@/store/localeStore";
 import type { FinancialModel, ScenarioKey, ScenarioOverrides } from "@/types/financial";
 
 export type UploadStatus = "idle" | "parsing" | "error" | "success";
@@ -45,7 +48,16 @@ export const useFinancialModelStore = create<FinancialModelState>((set, get) => 
   resetOverrides: () => set({ overrides: {} }),
 
   loadWorkbookFile: async (file: File) => {
+    const locale = useLocaleStore.getState().locale;
     set({ uploadStatus: "parsing", uploadError: null });
+
+    const validation = validateWorkbookFile(file);
+    if (!validation.ok) {
+      const key = validation.reason === "type" ? "errFileType" : validation.reason === "size" ? "errFileTooLarge" : "errFileEmpty";
+      set({ uploadStatus: "error", uploadError: translate(locale, key) });
+      return;
+    }
+
     try {
       const { model, warnings } = await parseWorkbookFile(file);
       set({
@@ -59,7 +71,7 @@ export const useFinancialModelStore = create<FinancialModelState>((set, get) => 
     } catch (err) {
       set({
         uploadStatus: "error",
-        uploadError: err instanceof Error ? err.message : "تعذرت قراءة ملف الإكسل.",
+        uploadError: err instanceof Error ? err.message : translate(locale, "errGeneric"),
       });
     }
   },
