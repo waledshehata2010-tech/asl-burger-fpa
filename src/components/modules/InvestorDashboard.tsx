@@ -68,7 +68,7 @@ export function InvestorDashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("chartRevenueNetIncomeTitle")}</CardTitle>
+          <CardTitle>{t("investorRevenueChartTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <LineChartPanel data={chartData} xKey="year" series={[{ key: revenueLabel, label: revenueLabel, color: "#4f8ff7" }]} height={280} />
