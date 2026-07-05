@@ -5,9 +5,9 @@ import {
   BarChart3,
   ClipboardList,
   FileBarChart,
-  GaugeCircle,
   Languages,
   LayoutDashboard,
+  Sandwich,
   ScatterChart,
   Users,
 } from "lucide-react";
@@ -93,13 +93,18 @@ export function AppShell() {
         className="no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-e border-border bg-card/60 px-3 py-5 lg:flex"
         aria-label="Primary"
       >
-        <div className="mb-6 flex items-center gap-2 px-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary/25 to-primary/10 text-primary shadow-inner">
-            <GaugeCircle className="h-5 w-5" aria-hidden="true" />
+        <div className="mb-6 flex items-center gap-2.5 px-2">
+          {/* Brand mark: gold circle + black glyph, matching the aslalburger.sa
+              logo's color composition. Swap for the real logo asset (an
+              <Image> pointing at /brand/asl-burger-logo.png) as soon as it's
+              available — this keeps the same footprint so no layout change
+              is needed when that lands. */}
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm shadow-primary/30">
+            <Sandwich className="h-5 w-5" aria-hidden="true" />
           </div>
-          <div>
-            <p className="text-sm font-semibold leading-tight">{t("appName")}</p>
-            <p className="text-[11px] text-muted-foreground leading-tight">{t("appTagline")}</p>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold leading-tight">{t("appName")}</p>
+            <p className="truncate text-[11px] text-muted-foreground leading-tight">{t("appTagline")}</p>
           </div>
         </div>
 
@@ -121,7 +126,7 @@ export function AppShell() {
                 {isActive && (
                   <motion.div
                     layoutId="nav-active"
-                    className="absolute inset-0 rounded-lg bg-primary/15"
+                    className="absolute inset-0 rounded-lg bg-primary/15 ring-1 ring-inset ring-primary/25"
                     transition={{ type: "spring", duration: 0.4, bounce: 0.2 }}
                   />
                 )}
@@ -142,11 +147,16 @@ export function AppShell() {
 
       <div className="flex min-h-screen flex-1 flex-col">
         <header className="no-print sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-background/80 px-4 py-4 backdrop-blur sm:px-6">
-          <div className="min-w-0">
-            <h1 className="truncate text-base font-semibold tracking-tight sm:text-lg">
-              {activeLabel ? t(activeLabel) : ""}
-            </h1>
-            <p className="hidden truncate text-xs text-muted-foreground sm:block">{t("headerSubtitle")}</p>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm shadow-primary/30 lg:hidden">
+              <Sandwich className="h-4 w-4" aria-hidden="true" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="truncate text-base font-semibold tracking-tight sm:text-lg">
+                {activeLabel ? t(activeLabel) : ""}
+              </h1>
+              <p className="hidden truncate text-xs text-muted-foreground sm:block">{t("headerSubtitle")}</p>
+            </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <div className="lg:hidden">
