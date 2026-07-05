@@ -24,8 +24,12 @@ export function BarChartPanel({ data, xKey, series, height = 260, stacked, value
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
         <defs>
-          {series.map((s) => (
-            <linearGradient key={s.key} id={`bar-fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+          {series.map((s, i) => (
+            // NOTE: gradient ids must be ASCII/whitespace-free — series.key is often a
+            // localized (Arabic) label used as the Recharts dataKey, and a raw label
+            // inside url(#...) silently fails to resolve, which makes the bar fall back
+            // to SVG's default black fill. Index-based ids sidestep that entirely.
+            <linearGradient key={s.key} id={`bar-fill-${i}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={s.color} stopOpacity={1} />
               <stop offset="100%" stopColor={s.color} stopOpacity={0.55} />
             </linearGradient>
@@ -48,12 +52,12 @@ export function BarChartPanel({ data, xKey, series, height = 260, stacked, value
           formatter={(v: unknown) => fmt(Number(v as number))}
         />
         <Legend wrapperStyle={{ fontSize: 12, color: "#9aa1ae", paddingTop: 8 }} iconType="circle" iconSize={8} />
-        {series.map((s) => (
+        {series.map((s, i) => (
           <Bar
             key={s.key}
             dataKey={s.key}
             name={s.label}
-            fill={`url(#bar-fill-${s.key})`}
+            fill={`url(#bar-fill-${i})`}
             radius={[5, 5, 0, 0]}
             stackId={stacked ? "stack" : undefined}
             animationDuration={700}
