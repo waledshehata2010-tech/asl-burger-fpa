@@ -67,17 +67,11 @@ body {
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 8px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
+/* Note: AG Grid theming is handled entirely via the v33+ JS Theming API
+   (see src/components/charts/ag-grid-theme.ts, `theme={fpaGridTheme}`) — no
+   CSS variables are needed here. The `.ag-theme-fpa` class on grid wrapper
+   divs is just a layout hook (rounded corners / overflow), not a legacy AG
+   Grid CSS theme. */
 .ag-theme-fpa {
-  --ag-background-color: transparent;
-  --ag-header-background-color: rgba(255,255,255,0.03);
-  --ag-odd-row-background-color: rgba(255,255,255,0.015);
-  --ag-header-foreground-color: #9aa1ae;
-  --ag-foreground-color: #e4e6ea;
-  --ag-border-color: rgba(255,255,255,0.06);
-  --ag-row-hover-color: rgba(79,143,247,0.06);
-  --ag-font-size: 13px;
-  --ag-font-family: var(--font-sans, "Inter", sans-serif);
-  --ag-cell-horizontal-padding: 14px;
-  --ag-header-height: 40px;
-  --ag-row-height: 38px;
+  border-radius: var(--radius);
 }
