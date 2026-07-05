@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { fpaGridTheme } from "@/components/charts/ag-grid-theme";
 import { useFinancialModel } from "@/hooks/useFinancialModel";
 import { fmtMetric } from "@/lib/format";
+import { useT, type DictKey } from "@/lib/i18n";
+import { ExportButtons } from "@/components/export/ExportButtons";
 import type { BenchmarkCompany } from "@/types/financial";
 
 interface BenchmarkRow {
@@ -19,16 +21,18 @@ interface BenchmarkRow {
 // Burgerizzr first, per the explicit comparison ordering requirement, then
 // Asl Burger's own model average, then the remaining listed peers, with the
 // sector average last as the reference band.
-const COMPANY_ORDER: { key: string; label: string }[] = [
-  { key: "burgerizzr", label: "برجريزر" },
-  { key: "aslBurger", label: "أصل البرجر" },
-  { key: "herfy", label: "هرفي" },
-  { key: "americana", label: "أمريكانا" },
-  { key: "industry", label: "متوسط الصناعة" },
+const COMPANY_ORDER: { key: string; labelKey: DictKey }[] = [
+  { key: "burgerizzr", labelKey: "benchCompanyBurgerizzr" },
+  { key: "aslBurger", labelKey: "benchCompanyAslBurger" },
+  { key: "herfy", labelKey: "benchCompanyHerfy" },
+  { key: "americana", labelKey: "benchCompanyAmericana" },
+  { key: "industry", labelKey: "benchCompanyIndustry" },
 ];
 
 export function Benchmarking() {
   const { benchmarkMetrics, benchmarkCompanies } = useFinancialModel();
+  const { t, locale } = useT();
+  const isRtl = locale === "ar";
 
   const rows: BenchmarkRow[] = useMemo(
     () =>
@@ -43,12 +47,24 @@ export function Benchmarking() {
     [benchmarkMetrics, benchmarkCompanies],
   );
 
+  const exportRows = useMemo(
+    () =>
+      rows.map((row) => {
+        const flat: Record<string, unknown> = { [t("colIndicator")]: row.metric };
+        for (const c of COMPANY_ORDER) {
+          flat[t(c.labelKey)] = fmtMetric(row[c.key] as number | null, row.fmt);
+        }
+        return flat;
+      }),
+    [rows, t],
+  );
+
   const columnDefs: ColDef<BenchmarkRow>[] = [
-    { field: "metric", headerName: "المؤشر", pinned: "right", minWidth: 200, cellClass: "font-medium" },
+    { field: "metric", headerName: t("colIndicator"), pinned: isRtl ? "right" : "left", minWidth: 200, cellClass: "font-medium" },
     ...COMPANY_ORDER.map(
       (c): ColDef<BenchmarkRow> => ({
         field: c.key,
-        headerName: c.label,
+        headerName: t(c.labelKey),
         flex: 1,
         minWidth: 130,
         cellClass: c.key === "aslBurger" ? "font-semibold" : undefined,
@@ -61,17 +77,23 @@ export function Benchmarking() {
   return (
     <div className="flex flex-col gap-5">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>معايير الصناعة — المقارنة التنافسية</CardTitle>
-            <CardDescription>برجريزر أولاً حسب الترتيب المطلوب، وعمود أصل البرجر مظلل للمقارنة المباشرة</CardDescription>
+            <CardTitle>{t("benchmarkTitle")}</CardTitle>
+            <CardDescription>{t("benchmarkDesc")}</CardDescription>
           </div>
-          <Badge variant="secondary">مصدر: Argaam · Investing.com · تقارير الشركات</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className="hidden sm:inline-flex">
+              {t("benchmarkSource")}
+            </Badge>
+            <ExportButtons rows={exportRows} sheetName={t("benchmarkTitle")} fileName="asl-burger-benchmarks" />
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="ag-theme-fpa" style={{ height: 340, width: "100%" }}>
+          <div className="ag-theme-fpa overflow-x-auto" style={{ height: 340, width: "100%" }}>
             <AgGridReact<BenchmarkRow>
               theme={fpaGridTheme}
+              enableRtl={isRtl}
               rowData={rows}
               columnDefs={columnDefs}
               domLayout="normal"

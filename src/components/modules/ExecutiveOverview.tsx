@@ -8,10 +8,12 @@ import { BarChartPanel } from "@/components/charts/BarChartPanel";
 import { useFinancialModel } from "@/hooks/useFinancialModel";
 import { fmtPct, fmtSar, fmtX } from "@/lib/format";
 import { cagr, latestYoY } from "@/services/dataEngine";
+import { useT } from "@/lib/i18n";
 
 export function ExecutiveOverview() {
   const { model, scenarioResult, benchmarkCompanies } = useFinancialModel();
   const { historical } = model;
+  const { t } = useT();
 
   const lastActualIdx = historical.years.length - 1;
   const lastActualRevenue = historical.revenue[lastActualIdx] ?? 0;
@@ -25,41 +27,51 @@ export function ExecutiveOverview() {
   const cash2030 = scenarioResult.endingCash[scenarioResult.endingCash.length - 1];
   const currentRatio2030 = scenarioResult.currentRatio[scenarioResult.currentRatio.length - 1];
   const revenueCagr = cagr([lastActualRevenue, ...scenarioResult.revenue]);
+  const lastForecastYear = scenarioResult.years[scenarioResult.years.length - 1];
 
   const industryBand: [number, number] = [1.1, 1.5];
   const exceedsBand = currentRatio2030 > industryBand[1];
 
+  const revenueActualLabel = t("legendRevenueActual");
+  const revenueForecastLabel = t("legendRevenueForecast");
+  const netIncomeActualLabel = t("legendNetIncomeActual");
+  const netIncomeForecastLabel = t("legendNetIncomeForecast");
+
   const chartData = [
     ...historical.years.map((y, i) => ({
       year: String(y),
-      "الإيرادات (فعلي)": historical.revenue[i],
-      "صافي الربح (فعلي)": historical.netIncome[i],
+      [revenueActualLabel]: historical.revenue[i],
+      [netIncomeActualLabel]: historical.netIncome[i],
     })),
     ...scenarioResult.years.map((y, i) => ({
       year: String(y),
-      "الإيرادات (متوقع)": scenarioResult.revenue[i],
-      "صافي الربح (متوقع)": scenarioResult.netIncome[i],
+      [revenueForecastLabel]: scenarioResult.revenue[i],
+      [netIncomeForecastLabel]: scenarioResult.netIncome[i],
     })),
   ];
 
+  const grossMarginLabel = t("metricGrossMargin");
+  const ebitdaMarginLabel = t("metricEbitdaMargin");
+  const netMarginLabel = t("metricNetMargin");
+
   const marginData = scenarioResult.years.map((y, i) => ({
     year: String(y),
-    "هامش إجمالي الربح": scenarioResult.grossMargin[i],
-    "هامش EBITDA": scenarioResult.ebitdaMargin[i],
-    "هامش صافي الربح": scenarioResult.netMargin[i],
+    [grossMarginLabel]: scenarioResult.grossMargin[i],
+    [ebitdaMarginLabel]: scenarioResult.ebitdaMargin[i],
+    [netMarginLabel]: scenarioResult.netMargin[i],
   }));
 
   return (
     <div className="flex flex-col gap-5">
       {exceedsBand && (
-        <Card className="border-warning/30 bg-warning/5">
+        <Card className="border-warning/30 bg-warning/5" role="status">
           <CardContent className="flex items-start gap-3 p-4">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden="true" />
             <div className="text-sm">
-              <p className="font-medium text-warning">نسبة التداول المتوقعة في 2030 ({fmtX(currentRatio2030)}) أعلى من نطاق الصناعة ({industryBand[0]}x–{industryBand[1]}x)</p>
-              <p className="mt-1 text-muted-foreground">
-                هذا يعكس تراكم نقدية فائضة عن حاجة التشغيل. خيارات مطروحة على مستوى مجلس الإدارة: رفع نسبة التوزيع، تسريع خطة التوسع، توزيعات استثنائية، أو تكوين احتياطي استراتيجي.
+              <p className="font-medium text-warning">
+                {t("currentRatioExceeds")} {lastForecastYear} ({fmtX(currentRatio2030)}) {t("aboveIndustryBand")} ({industryBand[0]}x–{industryBand[1]}x)
               </p>
+              <p className="mt-1 text-muted-foreground">{t("boardNote")}</p>
             </div>
           </CardContent>
         </Card>
@@ -67,7 +79,7 @@ export function ExecutiveOverview() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          label="إيرادات آخر سنة فعلية"
+          label={t("kpiLastActualRevenue")}
           value={fmtSar(lastActualRevenue)}
           delta={revenueYoY}
           sparkline={historical.revenue.filter((v): v is number => v !== null)}
@@ -75,7 +87,7 @@ export function ExecutiveOverview() {
           accent="primary"
         />
         <KpiCard
-          label="صافي الربح آخر سنة فعلية"
+          label={t("kpiLastActualNetIncome")}
           value={fmtSar(lastActualNetIncome)}
           delta={netIncomeYoY}
           sparkline={historical.netIncome.filter((v): v is number => v !== null)}
@@ -83,7 +95,7 @@ export function ExecutiveOverview() {
           accent="success"
         />
         <KpiCard
-          label="الإيرادات المتوقعة 2030"
+          label={`${t("kpiRevenue2030").replace("2030", String(lastForecastYear))}`}
           value={fmtSar(revenue2030)}
           delta={revenueCagr}
           sparkline={scenarioResult.revenue}
@@ -91,7 +103,7 @@ export function ExecutiveOverview() {
           accent="gold"
         />
         <KpiCard
-          label="النقدية آخر المدة 2030"
+          label={`${t("kpiCash2030").replace("2030", String(lastForecastYear))}`}
           value={fmtSar(cash2030)}
           delta={(cash2030 - lastActualCash) / (lastActualCash || 1)}
           sparkline={scenarioResult.endingCash}
@@ -103,18 +115,18 @@ export function ExecutiveOverview() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card className="xl:col-span-2">
           <CardHeader>
-            <CardTitle>الإيرادات وصافي الربح — فعلي ومتوقع (2018–2030)</CardTitle>
-            <CardDescription>خط متصل يمثل الفعلي، والفاصل يمثل السيناريو الأساسي المتوقع</CardDescription>
+            <CardTitle>{t("chartRevenueNetIncomeTitle")}</CardTitle>
+            <CardDescription>{t("chartRevenueNetIncomeDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <LineChartPanel
               data={chartData}
               xKey="year"
               series={[
-                { key: "الإيرادات (فعلي)", label: "الإيرادات (فعلي)", color: "#4f8ff7" },
-                { key: "الإيرادات (متوقع)", label: "الإيرادات (متوقع)", color: "#4f8ff7", dashed: true },
-                { key: "صافي الربح (فعلي)", label: "صافي الربح (فعلي)", color: "#34c77b" },
-                { key: "صافي الربح (متوقع)", label: "صافي الربح (متوقع)", color: "#34c77b", dashed: true },
+                { key: revenueActualLabel, label: revenueActualLabel, color: "#4f8ff7" },
+                { key: revenueForecastLabel, label: revenueForecastLabel, color: "#4f8ff7", dashed: true },
+                { key: netIncomeActualLabel, label: netIncomeActualLabel, color: "#34c77b" },
+                { key: netIncomeForecastLabel, label: netIncomeForecastLabel, color: "#34c77b", dashed: true },
               ]}
               height={300}
             />
@@ -123,21 +135,20 @@ export function ExecutiveOverview() {
 
         <Card>
           <CardHeader>
-            <CardTitle>موجز المقارنة مع الصناعة</CardTitle>
-            <CardDescription>متوسط الموديل 2026–2030 مقابل متوسط الصناعة</CardDescription>
+            <CardTitle>{t("benchmarkSummaryTitle")}</CardTitle>
+            <CardDescription>{t("benchmarkSummaryDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             {(["grossMargin", "netMargin", "currentRatio"] as const).map((key) => {
               const aslBurger = benchmarkCompanies.aslBurger[key];
               const industry = benchmarkCompanies.industry[key];
               const fmt = key === "currentRatio" ? fmtX : fmtPct;
+              const labelKey = key === "grossMargin" ? "metricGrossMargin" : key === "netMargin" ? "metricNetMargin" : "metricCurrentRatio";
               return (
                 <div key={key} className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-3 py-2 text-sm">
-                  <span className="text-muted-foreground">
-                    {key === "grossMargin" ? "هامش إجمالي الربح" : key === "netMargin" ? "هامش صافي الربح" : "نسبة التداول"}
-                  </span>
+                  <span className="text-muted-foreground">{t(labelKey)}</span>
                   <span className="tabular font-medium">
-                    {fmt(aslBurger)} <span className="text-muted-foreground">مقابل {fmt(industry)}</span>
+                    {fmt(aslBurger)} <span className="text-muted-foreground">{t("vsLabel")} {fmt(industry)}</span>
                   </span>
                 </div>
               );
@@ -148,16 +159,16 @@ export function ExecutiveOverview() {
 
       <Card>
         <CardHeader>
-          <CardTitle>تطور الهوامش خلال فترة التوقع</CardTitle>
+          <CardTitle>{t("marginsEvolutionTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <BarChartPanel
             data={marginData}
             xKey="year"
             series={[
-              { key: "هامش إجمالي الربح", label: "هامش إجمالي الربح", color: "#4f8ff7" },
-              { key: "هامش EBITDA", label: "هامش EBITDA", color: "#e8b64c" },
-              { key: "هامش صافي الربح", label: "هامش صافي الربح", color: "#34c77b" },
+              { key: grossMarginLabel, label: grossMarginLabel, color: "#4f8ff7" },
+              { key: ebitdaMarginLabel, label: ebitdaMarginLabel, color: "#e8b64c" },
+              { key: netMarginLabel, label: netMarginLabel, color: "#34c77b" },
             ]}
             valueFormatter={(v) => fmtPct(v)}
             height={280}

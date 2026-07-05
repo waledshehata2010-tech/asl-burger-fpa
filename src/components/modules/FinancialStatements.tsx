@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import type { ColDef } from "ag-grid-community";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fpaGridTheme } from "@/components/charts/ag-grid-theme";
 import { useFinancialModel } from "@/hooks/useFinancialModel";
 import { fmtNum, fmtX } from "@/lib/format";
+import { useT } from "@/lib/i18n";
+import { ExportButtons } from "@/components/export/ExportButtons";
 
 interface StatementRow {
   metric: string;
@@ -42,127 +44,112 @@ function yearColumns(years: (number | string)[], isRatioMetric: (row: StatementR
   }));
 }
 
+type TabKey = "income" | "balance" | "cashflow" | "scenario";
+
 export function FinancialStatements() {
   const { model, scenarioResult } = useFinancialModel();
+  const { t, locale } = useT();
   const { historical, forecastBase } = model;
+  const [activeTab, setActiveTab] = useState<TabKey>("income");
+  const isRtl = locale === "ar";
 
   const incomeRows = useMemo(
     () =>
       buildRows(forecastBase.years, [
-        { label: "الإيرادات", values: forecastBase.revenue },
-        { label: "مجمل الربح", values: forecastBase.grossProfit },
-        { label: "الربح التشغيلي", values: forecastBase.operatingIncome },
-        { label: "EBITDA", values: forecastBase.ebitda },
-        { label: "صافي ربح السنة", values: forecastBase.netIncome },
+        { label: t("lineRevenue"), values: forecastBase.revenue },
+        { label: t("lineGrossProfit"), values: forecastBase.grossProfit },
+        { label: t("lineOperatingIncome"), values: forecastBase.operatingIncome },
+        { label: t("lineEbitda"), values: forecastBase.ebitda },
+        { label: t("lineNetIncome"), values: forecastBase.netIncome },
       ]),
-    [forecastBase],
+    [forecastBase, t],
   );
 
   const balanceRows = useMemo(
     () =>
       buildRows(historical.years, [
-        { label: "النقدية وما في حكمها", values: historical.cash },
-        { label: "إجمالي الموجودات", values: historical.totalAssets },
-        { label: "إجمالي المطلوبات", values: historical.totalLiabilities },
-        { label: "إجمالي حقوق الملكية", values: historical.totalEquity },
+        { label: t("lineCash"), values: historical.cash },
+        { label: t("lineTotalAssets"), values: historical.totalAssets },
+        { label: t("lineTotalLiabilities"), values: historical.totalLiabilities },
+        { label: t("lineTotalEquity"), values: historical.totalEquity },
       ]),
-    [historical],
+    [historical, t],
   );
 
   const cashFlowRows = useMemo(
     () =>
       buildRows(forecastBase.years, [
-        { label: "المصروفات الرأسمالية (Capex)", values: forecastBase.capex },
-        { label: "رصيد النقدية آخر المدة", values: forecastBase.endingCash },
-        { label: "نسبة التداول", values: forecastBase.currentRatio, isRatio: true },
+        { label: t("lineCapex"), values: forecastBase.capex },
+        { label: t("lineEndingCash"), values: forecastBase.endingCash },
+        { label: t("lineCurrentRatioScenario"), values: forecastBase.currentRatio, isRatio: true },
       ]),
-    [forecastBase],
+    [forecastBase, t],
   );
 
   const scenarioRows = useMemo(
     () =>
       buildRows(scenarioResult.years, [
-        { label: "الإيرادات (سيناريو حالي)", values: scenarioResult.revenue },
-        { label: "صافي ربح السنة", values: scenarioResult.netIncome },
-        { label: "التوزيعات", values: scenarioResult.dividends },
-        { label: "رصيد النقدية آخر المدة", values: scenarioResult.endingCash },
-        { label: "نسبة التداول", values: scenarioResult.currentRatio, isRatio: true },
+        { label: t("lineRevenueScenario"), values: scenarioResult.revenue },
+        { label: t("lineNetIncome"), values: scenarioResult.netIncome },
+        { label: t("lineDividends"), values: scenarioResult.dividends },
+        { label: t("lineEndingCash"), values: scenarioResult.endingCash },
+        { label: t("lineCurrentRatioScenario"), values: scenarioResult.currentRatio, isRatio: true },
       ]),
-    [scenarioResult],
+    [scenarioResult, t],
   );
 
-  const isRatioRow = (row: StatementRow) => row.metric === "نسبة التداول";
+  const ratioLabels = new Set([t("lineCurrentRatioScenario")]);
+  const isRatioRow = (row: StatementRow) => ratioLabels.has(row.metric);
 
   const metricCol: ColDef<StatementRow> = {
     field: "metric",
-    headerName: "البند",
-    pinned: "right",
+    headerName: t("colMetric"),
+    pinned: isRtl ? "right" : "left",
     minWidth: 220,
     cellClass: "font-medium",
   };
 
+  const tabsData: Record<TabKey, { rows: StatementRow[]; years: (number | string)[]; label: string; height: number }> = {
+    income: { rows: incomeRows, years: forecastBase.years, label: t("tabIncome"), height: 280 },
+    balance: { rows: balanceRows, years: historical.years, label: t("tabBalance"), height: 240 },
+    cashflow: { rows: cashFlowRows, years: forecastBase.years, label: t("tabCashflow"), height: 200 },
+    scenario: { rows: scenarioRows, years: scenarioResult.years, label: t("tabScenario"), height: 260 },
+  };
+
+  const current = tabsData[activeTab];
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>القوائم المالية</CardTitle>
-        <CardDescription>مبنية مباشرة من ملف الإكسل — أي تحديث في الملف ينعكس هنا تلقائيًا</CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between gap-3">
+        <div>
+          <CardTitle>{t("statementsTitle")}</CardTitle>
+          <CardDescription>{t("statementsDesc")}</CardDescription>
+        </div>
+        <ExportButtons rows={current.rows} sheetName={current.label} fileName={`asl-burger-${activeTab}`} />
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="income">
-          <TabsList>
-            <TabsTrigger value="income">قائمة الدخل</TabsTrigger>
-            <TabsTrigger value="balance">المركز المالي</TabsTrigger>
-            <TabsTrigger value="cashflow">التدفقات النقدية</TabsTrigger>
-            <TabsTrigger value="scenario">حسب السيناريو المختار</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabKey)}>
+          <TabsList className="flex-wrap h-auto">
+            <TabsTrigger value="income">{t("tabIncome")}</TabsTrigger>
+            <TabsTrigger value="balance">{t("tabBalance")}</TabsTrigger>
+            <TabsTrigger value="cashflow">{t("tabCashflow")}</TabsTrigger>
+            <TabsTrigger value="scenario">{t("tabScenario")}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="income">
-            <div className="ag-theme-fpa" style={{ height: 280, width: "100%" }}>
-              <AgGridReact<StatementRow>
-                theme={fpaGridTheme}
-                rowData={incomeRows}
-                columnDefs={[metricCol, ...yearColumns(forecastBase.years, isRatioRow)]}
-                domLayout="normal"
-                suppressCellFocus
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="balance">
-            <div className="ag-theme-fpa" style={{ height: 240, width: "100%" }}>
-              <AgGridReact<StatementRow>
-                theme={fpaGridTheme}
-                rowData={balanceRows}
-                columnDefs={[metricCol, ...yearColumns(historical.years, isRatioRow)]}
-                domLayout="normal"
-                suppressCellFocus
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="cashflow">
-            <div className="ag-theme-fpa" style={{ height: 200, width: "100%" }}>
-              <AgGridReact<StatementRow>
-                theme={fpaGridTheme}
-                rowData={cashFlowRows}
-                columnDefs={[metricCol, ...yearColumns(forecastBase.years, isRatioRow)]}
-                domLayout="normal"
-                suppressCellFocus
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="scenario">
-            <div className="ag-theme-fpa" style={{ height: 260, width: "100%" }}>
-              <AgGridReact<StatementRow>
-                theme={fpaGridTheme}
-                rowData={scenarioRows}
-                columnDefs={[metricCol, ...yearColumns(scenarioResult.years, isRatioRow)]}
-                domLayout="normal"
-                suppressCellFocus
-              />
-            </div>
-          </TabsContent>
+          {(Object.keys(tabsData) as TabKey[]).map((key) => (
+            <TabsContent key={key} value={key}>
+              <div className="ag-theme-fpa overflow-x-auto" style={{ height: tabsData[key].height, width: "100%" }}>
+                <AgGridReact<StatementRow>
+                  theme={fpaGridTheme}
+                  enableRtl={isRtl}
+                  rowData={tabsData[key].rows}
+                  columnDefs={[metricCol, ...yearColumns(tabsData[key].years, isRatioRow)]}
+                  domLayout="normal"
+                  suppressCellFocus
+                />
+              </div>
+            </TabsContent>
+          ))}
         </Tabs>
       </CardContent>
     </Card>

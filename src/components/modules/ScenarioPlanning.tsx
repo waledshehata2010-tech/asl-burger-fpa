@@ -11,9 +11,14 @@ import { KpiCard } from "@/components/kpi/KpiCard";
 import { useFinancialModel } from "@/hooks/useFinancialModel";
 import { fmtPct, fmtSar, fmtX } from "@/lib/format";
 import { computeScenario } from "@/services/dataEngine";
+import { useT, type DictKey } from "@/lib/i18n";
 import type { ScenarioKey } from "@/types/financial";
 
-const SCENARIO_ORDER: ScenarioKey[] = ["pessimistic", "base", "optimistic"];
+const SCENARIO_ORDER: { key: ScenarioKey; labelKey: DictKey }[] = [
+  { key: "pessimistic", labelKey: "scenarioPessimistic" },
+  { key: "base", labelKey: "scenarioBase" },
+  { key: "optimistic", labelKey: "scenarioOptimistic" },
+];
 
 export function ScenarioPlanning() {
   const {
@@ -26,6 +31,7 @@ export function ScenarioPlanning() {
     updateOverride,
     resetOverrides,
   } = useFinancialModel();
+  const { t } = useT();
 
   const activeDef = model.scenarios[scenarioKey];
   const sameStoreDelta = overrides.sameStoreDelta ?? activeDef.sameStoreDelta;
@@ -35,34 +41,37 @@ export function ScenarioPlanning() {
   // Base case reference line for comparison, always recomputed with zero overrides.
   const baseReference = useMemo(() => computeScenario(model, "base"), [model]);
 
+  const currentScenarioLabel = t("legendCurrentScenario");
+  const baseReferenceLabel = t("legendBaseReference");
+
   const chartData = scenarioResult.years.map((y, i) => ({
     year: String(y),
-    "الإيرادات (السيناريو الحالي)": scenarioResult.revenue[i],
-    "الإيرادات (الأساسي)": baseReference.revenue[i],
-    "النقدية آخر المدة (الحالي)": scenarioResult.endingCash[i],
+    [currentScenarioLabel]: scenarioResult.revenue[i],
+    [baseReferenceLabel]: baseReference.revenue[i],
   }));
 
   const lastIdx = scenarioResult.years.length - 1;
+  const lastYear = scenarioResult.years[lastIdx];
 
   return (
     <div className="flex flex-col gap-5">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>اختيار السيناريو</CardTitle>
-            <CardDescription>السيناريو الأساسي مبني على افتراضات ملف الإكسل تمامًا؛ حرّك المؤشرات لاختبار حساسية النموذج</CardDescription>
+            <CardTitle>{t("scenarioTitle")}</CardTitle>
+            <CardDescription>{t("scenarioDesc")}</CardDescription>
           </div>
           <Button variant="ghost" size="sm" onClick={resetOverrides}>
-            <RotateCcw className="h-4 w-4" />
-            إعادة تعيين
+            <RotateCcw className="h-4 w-4" aria-hidden="true" />
+            {t("resetOverrides")}
           </Button>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <Tabs value={scenarioKey} onValueChange={(v) => setScenarioKey(v as ScenarioKey)}>
-            <TabsList>
-              {SCENARIO_ORDER.map((key) => (
+            <TabsList className="flex-wrap h-auto">
+              {SCENARIO_ORDER.map(({ key, labelKey }) => (
                 <TabsTrigger key={key} value={key}>
-                  {model.scenarios[key].label}
+                  {t(labelKey)}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -71,7 +80,7 @@ export function ScenarioPlanning() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">نمو مبيعات الفروع القائمة</span>
+                <span className="text-muted-foreground">{t("sliderSameStore")}</span>
                 <span className="tabular font-medium">{sameStoreDelta >= 0 ? "+" : ""}{fmtPct(sameStoreDelta)}</span>
               </div>
               <Slider
@@ -79,13 +88,14 @@ export function ScenarioPlanning() {
                 min={-0.1}
                 max={0.1}
                 step={0.005}
+                aria-label={t("sliderSameStore")}
                 onValueChange={([v]) => updateOverride("sameStoreDelta", v)}
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">صدمة تكلفة البضاعة المباعة</span>
+                <span className="text-muted-foreground">{t("sliderCogsShock")}</span>
                 <span className="tabular font-medium">{cogsShock >= 0 ? "+" : ""}{fmtPct(cogsShock)}</span>
               </div>
               <Slider
@@ -93,13 +103,14 @@ export function ScenarioPlanning() {
                 min={-0.03}
                 max={0.08}
                 step={0.005}
+                aria-label={t("sliderCogsShock")}
                 onValueChange={([v]) => updateOverride("cogsShock", v)}
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">علاوة مخاطر WACC</span>
+                <span className="text-muted-foreground">{t("sliderWacc")}</span>
                 <span className="tabular font-medium">{waccPremium >= 0 ? "+" : ""}{fmtPct(waccPremium)}</span>
               </div>
               <Slider
@@ -107,6 +118,7 @@ export function ScenarioPlanning() {
                 min={-0.03}
                 max={0.05}
                 step={0.005}
+                aria-label={t("sliderWacc")}
                 onValueChange={([v]) => updateOverride("waccPremium", v)}
               />
             </div>
@@ -115,24 +127,41 @@ export function ScenarioPlanning() {
       </Card>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="الإيرادات 2030" value={fmtSar(scenarioResult.revenue[lastIdx])} icon={Calculator} accent="primary" />
-        <KpiCard label="صافي الربح 2030" value={fmtSar(scenarioResult.netIncome[lastIdx])} accent="success" />
-        <KpiCard label="النقدية آخر المدة 2030" value={fmtSar(scenarioResult.endingCash[lastIdx])} accent="gold" />
-        <KpiCard label="نسبة التداول 2030" value={fmtX(scenarioResult.currentRatio[lastIdx])} accent="warning" />
+        <KpiCard
+          label={`${t("kpiRevenue2030Short").replace("2030", String(lastYear))}`}
+          value={fmtSar(scenarioResult.revenue[lastIdx])}
+          icon={Calculator}
+          accent="primary"
+        />
+        <KpiCard
+          label={`${t("kpiNetIncome2030").replace("2030", String(lastYear))}`}
+          value={fmtSar(scenarioResult.netIncome[lastIdx])}
+          accent="success"
+        />
+        <KpiCard
+          label={`${t("kpiCash2030Short").replace("2030", String(lastYear))}`}
+          value={fmtSar(scenarioResult.endingCash[lastIdx])}
+          accent="gold"
+        />
+        <KpiCard
+          label={`${t("kpiCurrentRatio2030").replace("2030", String(lastYear))}`}
+          value={fmtX(scenarioResult.currentRatio[lastIdx])}
+          accent="warning"
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card className="xl:col-span-2">
           <CardHeader>
-            <CardTitle>الإيرادات المتوقعة حسب السيناريو مقابل الأساسي</CardTitle>
+            <CardTitle>{t("scenarioVsBaseTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
             <LineChartPanel
               data={chartData}
               xKey="year"
               series={[
-                { key: "الإيرادات (السيناريو الحالي)", label: "السيناريو الحالي", color: "#4f8ff7" },
-                { key: "الإيرادات (الأساسي)", label: "الأساسي (مرجعي)", color: "#9aa1ae", dashed: true },
+                { key: currentScenarioLabel, label: currentScenarioLabel, color: "#4f8ff7" },
+                { key: baseReferenceLabel, label: baseReferenceLabel, color: "#9aa1ae", dashed: true },
               ]}
               height={280}
             />
@@ -141,20 +170,20 @@ export function ScenarioPlanning() {
 
         <Card>
           <CardHeader>
-            <CardTitle>تقييم DCF</CardTitle>
-            <CardDescription>القيمة المؤسسية بناءً على التدفقات النقدية الحرة للسيناريو الحالي</CardDescription>
+            <CardTitle>{t("dcfTitle")}</CardTitle>
+            <CardDescription>{t("dcfDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <div>
-              <p className="text-xs text-muted-foreground">القيمة المؤسسية (EV)</p>
+              <p className="text-xs text-muted-foreground">{t("dcfEv")}</p>
               <p className="mt-1 text-2xl font-semibold tabular">{fmtSar(dcf.enterpriseValue)}</p>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-3 py-2 text-sm">
-              <span className="text-muted-foreground">معدل الخصم WACC</span>
+              <span className="text-muted-foreground">{t("dcfWacc")}</span>
               <span className="tabular font-medium">{fmtPct(dcf.wacc)}</span>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-3 py-2 text-sm">
-              <span className="text-muted-foreground">التدفق النقدي الحر 2030</span>
+              <span className="text-muted-foreground">{`${t("dcfFcf2030").replace("2030", String(lastYear))}`}</span>
               <span className="tabular font-medium">{fmtSar(dcf.fcf[dcf.fcf.length - 1])}</span>
             </div>
           </CardContent>
