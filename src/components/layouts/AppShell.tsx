@@ -8,7 +8,7 @@ import {
   Languages,
   LayoutDashboard,
   ScatterChart,
-  Users,
+  Users,Map,
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
