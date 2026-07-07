@@ -51,6 +51,9 @@ const BoardDashboard = dynamic(
 const InvestorDashboard = dynamic(
   () => import("@/components/modules/InvestorDashboard").then((m) => m.InvestorDashboard),
   { loading: ModuleSkeleton },
+);const BranchSalesAnalysis = dynamic(
+  () => import("@/components/modules/BranchSalesAnalysis").then((m) => m.BranchSalesAnalysis),
+  { loading: ModuleSkeleton, ssr: false },
 );
 
 const MODULES: { key: ModuleKey; labelKey: DictKey; icon: typeof LayoutDashboard }[] = [
